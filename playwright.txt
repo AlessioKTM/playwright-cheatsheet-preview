@@ -1,94 +1,146 @@
 @alexisok.gumroad.com
 https://github.com/AlessioKTM
 
-===============================================================================
-Flow overview (preview):
--------------------------------------------------------------------------------
-16. Imports
-28. Player
-37. Browser basics
-83. Context basics
-95. Page basics
-110. Element basics
-146. Selector basics
-180. Practice link
-===============================================================================
+ ______________________________________________________________________________________________
+| Flow with line:            | Tested on:                     | Installation commands:         |
+|    16. imports             |    - playwright vX.X.X         |   pip install playwright       |
+|    28. player              |    - python     vX.X.X         |   playwright install           |
+|    37. browser             |                                |   playwright codegen           |
+|    83. context             |                                |                                |
+|    95. page                |                                |                                |
+|    110. element            |                                |                                |
+|    146. selector           |                                |                                |
+|    180. practice           |                                |                                |
+|____________________________|________________________________|________________________________|
 
-IMPORTS:
----------
-from playwright.sync_api import sync_playwright
-from playwright.async_api import async_playwright
 
-# Main objects
-# Playwright = browser factory
-# Browser = browser instance
-# BrowserContext = isolated session
-# Page = single tab
-# ElementHandle = DOM element reference
-# Dialog = alerts, confirms, prompts
+ _____________________________________________________________
+| IMPORTS:                                                    |
+|   from playwright.sync_api import  ( sync_playwright  )     |
+|   from playwright.async_api import ( async_playwright )     |
+|                                                             |
+|     Playwright        # main controller (browser factory)   |
+|     Browser           # browser instance                    |
+|     BrowserContext    # isolated browser session            |
+|     Page              # single tab / page                   |
+|     ElementHandle     # DOM element reference               |
+|     Dialog            # alerts, confirms, prompts           |
+|_____________________________________________________________|
+ _____________________________________________________________
+| with sync_playwright() as PLAYER:                           |
+|   # start/stop browser session                              |
+|   pass                                                      |
+|_____________________________________________________________|
 
-PLAYER:
---------
-with sync_playwright() as PLAYER:
-    # start/stop browser session
-    pass
 
-BROWSER:
---------
-browser = PLAYER.chromium.launch(headless=True)
-# Also: PLAYER.firefox.launch(), PLAYER.webkit.launch()
-# Only showing basic params: headless, args
-# Full version has advanced params (proxy, viewport, downloads...)
+ ______________________________________________________________________________________________
+| BROWSER = PLAYER .chromium .firefox .webkit                                                  |
+|   .launch()                                 # classic                                        |
+|----------------------------------------------------------------------------------------------|
+|   # SHARED PARAMS (usable for all types)                                                     |
+|       headless                (bool)        # run without UI                                 |
+|       args                    (List[str])   # browser CLI flags                              |
+|       executable_path         (str)         # custom browser executable                      |
+|       channel                 (str)         # chrome, msedge, etc.                           |
+|       proxy                   (dict)        # network proxy                                  |
+|       slow_mo                 (int)         # delay each action                              |
+|       timeout                 (float)       # max start time                                 |
+|       downloads_path          (str)         # directory for downloads                        |
+|       chromium_sandbox        (bool)        # enable/disable sandbox                         |
+|       firefox_user_prefs      (dict)        # advanced Firefox prefs                         |
+|______________________________________________________________________________________________|
 
-CONTEXT:
---------
-context = browser.new_context()
-page = context.new_page()
-# .close() to close the context and all pages
+ _____________________________________________________________________________________________________________
+|   CONTEXT = BROWSER .new_context()                                                                          |
+|     .new_page()                                                # creates a new tab in this context          |
+|     .add_cookies(cookies: List[dict])          (List[dict])    # adds cookies to this context               |
+|     .clear_cookies()                                           # deletes all cookies                        |
+|     .close()                                                   # 'closes the context' and all its pages     |
+|_____________________________________________________________________________________________________________|
 
-PAGE:
------
-page.goto("https://example.com")
-page.screenshot(path="example.png")
-page.close()
-# Use page.locator(SELECTOR) for basic element interactions
 
-ELEMENT:
---------
-element = page.locator("input#username")
-element.click()
-element.fill("my text")
-element.type("typing text", delay=50)
-element.get_attribute("value")
-element.inner_text()
-# Basic interactions only (click, fill, type, read value)
+ __________________________________________________________________________________________________________
+|   PAGE = CONTEXT .new_page()                                                                             |
+|     .goto(url: str, wait_until: str = "load")                  # navigates page to URL                   |
+|     .screenshot(path: str | None = None)                       # takes a screenshot                      |
+|     .close()                                                   # 'closes the page/tabs'                  |
+|__________________________________________________________________________________________________________|
 
-SELECTOR:
----------
-# Basic XPath examples
-/html/body/div             # div direct child of body
-//div[@id='main']          # div with id
-//input[@name='email']     # input with name
-//p[text()='Hello']        # p element with exact text
-//p[contains(text(),'Hello')] # contains text
+ __________________________________________________________________________________________________________
+|   ELEMENT = PAGE.locator( SELECTOR)                                                                      |
+|                                                                                                          |
+|     .click(timeout, force)                                    # clicks the element                       |
+|                                                                                                          |
+|     .fill(value, timeout)                                     # clears and fills input                   |
+|     .type(text, delay)                                        # types text character by char             |
+|                                                                                                          |
+|     .inner_text()                                             # returns visible inner text               |                                                                                                        |
+|     .get_attribute(name)                                      # returns attribute value                  |
+|__________________________________________________________________________________________________________|
 
-# Basic CSS-like/XPath combos
-sel = "//ul//li[contains(text(),'see more')]"
-elements = page.locator(sel).all()
-for el in elements:
-    print(el.get_attribute("class"))
+ ___________________________________________________________________________________________
+|   SELECTOR = ""                             # USING XPATH (one-based list)                |
+|                                                                                           |
+|   # Basic examples                                                                        |
+|     /html/body/div                          # div that is direct child of body            |
+|                                                                                           |
+|   # Attribute-based selection                                                             |
+|     //div[ @id='main' ]                     # div with id="main"                          |
+|     //input[ @name='email' ]                # input with name="email"                     |
+|                                                                                           |
+|   # Text-based selection                                                                  |
+|     //p[ text()='Hello' ]                   # p element with exact text "Hello"           |
+|     //p[ contains(text(), 'Hello') ]        # p element containing text "Hello"           |
+|___________________________________________________________________________________________|
 
-USED TO & EXAMPLES:
-------------------
-Where to practice: https://practice.expandtesting.com/
 
-# Only show one small teaser example
-# Locator & ElementHandle
-sel = "//div[contains(@class,'row')]/div[contains(@class,'col-md')]"
-els = page.locator(sel).all()
-for el in els:
-    print(el.get_attribute("class"))
-# Full version has more advanced handling, dialogs, iframes, navigation
+
+   ______________________________________________________________________________________________________________________
+  /                                      USED TO & EXAMPLES                                                             /|
+ /_____________________________________________________________________________________________________________________/ |
+|                       Where to practice -> https://practice.expandtesting.com/                                       | |
+|______________________________________________________________________________________________________________________|/|
+| Flow with line:                                                                                                      | |
+|   193. Locator & ElementHandle                                                                                       | |
+|______________________________________________________________________________________________________________________|/
+
+ ______________________________________________________________________________________________________________________
+| TOPIC: Locator & ElementHandle                                                                                       |
+|----------------------------------------------------------------------------------------------------------------------|
+|   WHEN:  selecting muti/dynamic elements                                                                             |
+|   WHY:   auto-wait & retry VS fragile static handle                                                                  |
+|   API:   page.locator(), locator.all(), locator.element_handles()                                                    |
+|   NOTES: Prefer locator; ElementHandle solo low-level                                                                |
+|----------------------------------------------------------------------------------------------------------------------|
+| EXAMPLE:                                                                                                             |
+|                                                                                                                      |
+|    '''                                                                                                               |
+|    HTML_PAGE:                                                                                                        |
+|        <div class="row mb-2">                                                                                        |
+|            <div class="col-md-4">                                                                                    |
+|                <div class="col">                                                                                     |
+|                    <label for="input-number">Input: Number</label>                                                   |
+|                    <input id="input-number" class="input-box" name="input-number" type="number" value="">            |
+|    '''                                                                                                               |
+|                                                                                                                      |
+|    sel = "//div[contains(@class, 'col-md')]/div[contains(@class, 'row')]"                                            |
+|                                                                                                                      |
+|    # N.1 -> EL as ElementHandle -> list of ElementHandles                                                            |
+|    els = page.locator(sel).element_handles()                                                                         |
+|    for el in els:                                                                                                    |
+|        print(el.get_attribute("class"))                                                                              |
+|                                                                                                                      |
+|   # ElementHandle -> no auto-wait, more fragile                                                                      |
+|                                                                                                                      |
+|                                                                                                                      |
+|    # N.2 -> EL as Locator -> list of Locators                                                                        |
+|    els = page.locator(sel).all()                                                                                     |
+|    for el in els:                                                                                                    |
+|        print(el.get_attribute("class"))                                                                              |
+|                                                                                                                      |
+|    # PREFERRED -> Locator keeps auto-wait & retry per element                                                        |
+|______________________________________________________________________________________________________________________|
+
 
 ===============================================================================
 # Note: This is a **preview**. Full version (.txt, PDF, MD) is on Gumroad:
